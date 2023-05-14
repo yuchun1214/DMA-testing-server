@@ -5,8 +5,8 @@ import { time } from 'console';
 
 // change the status of the job to 'status'
 function changeTheStatus(id, status) {
-    console.log("Change the job_id", id, "to", status)
-    const sql = `UPDATE jobs SET job_status = ? WHERE job_id = ?`;
+    console.log("Attempt to change the job_id", id, "to", status)
+    const sql = `UPDATE jobs SET job_status = ? WHERE job_id = ? AND job_status <> 'Canceled'`;
     const param = [status, id];
 
     db.run(sql, param, function (err) {
@@ -18,8 +18,8 @@ function changeTheStatus(id, status) {
 
 // change the status of the job to Done and update the solve time as well
 function changeTheStatusToDone(id, status, solve_time) {
-    console.log("Change the job_id", id, "to", status)
-    const sql = `UPDATE jobs SET job_status = ?, solve_time = ? WHERE job_id = ?`;
+    console.log("Attempt to change the job_id", id, "to", status)
+    const sql = `UPDATE jobs SET job_status = ?, solve_time = ? WHERE job_id = ? AND job_status <> 'Canceled'`;
     const param = [status, solve_time, id];
     console.log(id, " is done")
     db.run(sql, param, function (err) {
