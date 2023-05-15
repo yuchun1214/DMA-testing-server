@@ -77,7 +77,7 @@ export default async function handler(req, res) {
         // // insert the data into the database
         try {
             await insertTheJob(hash_id, time_limit_sec, start_time);
-            const random_time1 = await randomTime(5000);
+            const random_time1 = await randomTime(10000);
             console.log("start running after ", random_time1)
             setTimeout(changeTheStatus, random_time1, hash_id, 'Running');
             console.log("Time limit sec = ", time_limit_sec)

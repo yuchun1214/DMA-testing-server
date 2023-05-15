@@ -42,7 +42,24 @@ export default function hander(req, res){
             res.status(500).json({message: "Internal Server Error"})
         })
         return;
-    }else{
-        res.status(405).json({message: "Method Not Allowed"})
+    }else if (req.method === 'DELETE'){
+        const { job_id } = req.query
+        // check if the alive field is true, if it set it to be false
+        const sql = `DELETE FROM jobs WHERE job_id = ?` 
+        try{
+            db.run(sql, [job_id], (err) => {
+                if(err){
+                    console.log(err)
+                    res.status(500).json({message: "Internal Server Error"})
+                }else{
+                    res.status(200).json({message: `Delete Successfully`})
+                }
+            })
+        }catch(err){
+            console.log(err)
+            res.status(500).json({message: "Internal Server Error"})
+        }
+        
+        return;
     }
 }
