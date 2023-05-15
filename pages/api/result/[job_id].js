@@ -11,7 +11,7 @@ async function getTheStatusOfJob(id){
     })
 }
 
-export default function hander(req, res){
+export default async function hander(req, res){
     if(req.method === 'GET'){
         const { job_id } = req.query
 
@@ -45,16 +45,39 @@ export default function hander(req, res){
     }else if (req.method === 'DELETE'){
         const { job_id } = req.query
         // check if the alive field is true, if it set it to be false
-        const sql = `DELETE FROM jobs WHERE job_id = ?` 
+        const sql = `SELECT job_status FROM jobs WHERE job_id = ?`
         try{
-            db.run(sql, [job_id], (err) => {
-                if(err){
-                    console.log(err)
-                    res.status(500).json({message: "Internal Server Error"})
+            new Promise((resolve, reject) => {
+                db.get(sql, [job_id], (err, row) => {
+                    if(err){
+                        console.log(err)
+                        reject(err)
+                    }
+                    resolve(row.job_status)
+                })
+            }).then((status) => {
+                console.log('status : ', status)
+                if(status === 'Deleted'){
+                    res.status(400).json({message: `job is already deleted`})
+                }else if(status === 'Waiting' || status === 'Running'){
+                    res.status(200).json({
+                        message : 'Job is not done',
+                        status : status
+                    })
                 }else{
-                    res.status(200).json({message: `Delete Successfully`})
+                    db.run(`UPDATE jobs SET job_status = 'Deleted', alive='false' WHERE job_id = ?`, [job_id], (err) => {
+                        if(err){
+                            console.log(err)
+                            res.status(500).json({message: "Internal Server Error"})
+                        }
+                        res.status(200).json({
+                            message : 'Job is deleted',
+                            status : 'Deleted'
+                        })
+                    })
                 }
             })
+            return;
         }catch(err){
             console.log(err)
             res.status(500).json({message: "Internal Server Error"})
